@@ -8,7 +8,7 @@
 #define BAR_LENGTH 32
 
 static Listener *bassListener;
-static Listener *trebleListener;
+static Listener *otherListener;
 
 pthread_t thread_id1;
 pthread_t thread_id2;
@@ -43,9 +43,9 @@ void signal_handler(/*int sig*/)
     {
         fprintf(stderr, "Error: Failed to destroy bassListener\n");
     }
-    if (listener_destroy(trebleListener) != 0)
+    if (listener_destroy(otherListener) != 0)
     {
-        fprintf(stderr, "Error: Failed to destroy trebleListener\n");
+        fprintf(stderr, "Error: Failed to destroy otherListener\n");
     }
     exit(0);
 }
@@ -53,13 +53,13 @@ void signal_handler(/*int sig*/)
 void bar()
 {
     FreqInfo bass_info = get_freq_info(bassListener, 0);
-    FreqInfo treble_info = get_freq_info(trebleListener, 0);
+    FreqInfo other_info = get_freq_info(otherListener, 0);
 
     int bass_level = (int)(bass_info.freq_level * BAR_LENGTH);
-    int treble_level = (int)(treble_info.freq_level * BAR_LENGTH);
+    int other_level = (int)(other_info.freq_level * BAR_LENGTH);
 
     bass_level = bass_level > BAR_LENGTH ? BAR_LENGTH : bass_level;
-    treble_level = treble_level > BAR_LENGTH ? BAR_LENGTH : treble_level;
+    other_level = other_level > BAR_LENGTH ? BAR_LENGTH : other_level;
 
     mvprintw(0, 0, "[Bass]   - {");
     mvprintw(1, 0, "[Other+] - {");
@@ -75,7 +75,7 @@ void bar()
         mvprintw(0, 12 + i, "#");
     }
 
-    for (int i = 0; i < treble_level; i++)
+    for (int i = 0; i < other_level; i++)
     {
         mvprintw(1, 12 + i, "#");
     }
@@ -101,16 +101,16 @@ int main(int argc, char **argv)
     int num_ranges2 = sizeof(frequencies2) / sizeof(frequencies2[0]);
 
     bassListener = listener_create(buf_size, n, sample_rate, decay_rate, sensitivity1, num_ranges, frequencies, "Sink #57");
-    trebleListener = listener_create(buf_size, n, sample_rate, decay_rate2, sensitivity2, num_ranges2, frequencies2, "Sink #57");
+    otherListener = listener_create(buf_size, n, sample_rate, decay_rate2, sensitivity2, num_ranges2, frequencies2, "Sink #57");
 
-    if (!bassListener || !trebleListener)
+    if (!bassListener || !otherListener)
     {
         fprintf(stderr, "Failed to create listeners\n");
         return 1;
     }
 
     pthread_create(&thread_id1, NULL, start_listening_thread, bassListener);
-    pthread_create(&thread_id2, NULL, start_listening_thread, trebleListener);
+    pthread_create(&thread_id2, NULL, start_listening_thread, otherListener);
 
     initscr();
     noecho();
