@@ -8,6 +8,7 @@ typedef struct {
     int freq;
     double freq_level;
     int freq_progress;
+    double prev_level;
 } FrequencyRange;
 
 typedef struct {
@@ -31,10 +32,11 @@ typedef struct {
     int num_ranges;
     FrequencyRange *ranges;
     pthread_mutex_t mutex;
+    pthread_cond_t cond;
     char *sink_name;
 } Listener;
 
-/* Declaration of functions defined in ls.c */
+/* listener.c Functions */
 extern Listener *listener_create(int buf_size, int n, int sample_rate, double decay_rate, double sensitivity, int num_ranges, int *frequencies, char *sink_name);
 extern FreqInfo get_freq_info(Listener *listener, int range_index);
 extern int listener_destroy(Listener *listener);
