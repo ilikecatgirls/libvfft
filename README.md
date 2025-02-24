@@ -9,7 +9,7 @@ Needs many improvements, see Goals further below.
 ## Simple example usage
 ### print when activity in between 50-500Hz
 ```c
-#include <ls.h>
+#include "listener.h"
 #include <unistd.h>
 #include <stdio.h>
 
